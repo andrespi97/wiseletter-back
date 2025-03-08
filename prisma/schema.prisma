@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                 Int            @id @default(autoincrement())
+  name               String
+  surname            String?
+  email              String         @unique
+  password           String
+  role               String? // admin, vip, null
+  course             String?
+  active             Boolean        @default(true)
+  accepNotifications Boolean        @default(true)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  subscriptions      Subscription[]
+  folders            Folder[]
+  rates              Rate[]
+  newsletters        Newsletter[]   @relation("UserNewsletters")
+  Newsletter         Newsletter[]
+}
+
+model Category {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  newsletters Newsletter[] @relation("CategoryNewsletters")
+}
+
+model Rate {
+  userId       Int
+  newsletterId Int
+  value        Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id])
+  newsletter Newsletter @relation(fields: [newsletterId], references: [id])
+
+  @@id([userId, newsletterId]) // Ensure that one user can only rate a newsletter once
+}
+
+model Folder {
+  id          Int          @id @default(autoincrement())
+  name        String
+  userId      Int // Changed to Int for consistency
+  user        User         @relation(fields: [userId], references: [id])
+  newsletters Newsletter[]
+  createdAt   DateTime     @default(now())
+}
+
+model Subscription {
+  id           Int        @id @default(autoincrement())
+  userId       Int // Changed to Int for consistency
+  newsletterId Int
+  user         User       @relation(fields: [userId], references: [id])
+  newsletter   Newsletter @relation(fields: [newsletterId], references: [id])
+  createdAt    DateTime   @default(now())
+
+  @@unique([userId, newsletterId]) // Un usuario no puede suscribirse dos veces a la misma newsletter
+}
+
+model Newsletter {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String
+  active      Boolean    @default(true)
+  url         String     @unique
+  categories  Category[] @relation("CategoryNewsletters")
+
+  subscriptions Subscription[]
+  rates         Rate[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  folder        Folder?        @relation(fields: [folderId], references: [id])
+  folderId      Int?
+  idUserCreator Int
+  userCreator   User           @relation(fields: [idUserCreator], references: [id])
+  language      String?
+
+  User User[] @relation("UserNewsletters")
+}
