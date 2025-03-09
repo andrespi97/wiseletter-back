@@ -1,16 +1,16 @@
 import { prisma } from "../database/database";
 import { HttpException } from "../exceptions/httpException";
-import { Offer, PrismaClient, User } from "@prisma/client";
+import { Newsletter, PrismaClient, User } from "@prisma/client";
 //const prisma = new PrismaClient()
 
-export class OfferService {
+export class NewsletterService {
   static async getById(id: number) {
-    const findOffer = await prisma.offer.findUnique({ where: { id } });
-    if (!findOffer) throw new HttpException(404, "Offer not found");
-    return findOffer;
+    const findNewsletter = await prisma.newsletter.findUnique({ where: { id } });
+    if (!findNewsletter) throw new HttpException(404, "Offer not found");
+    return findNewsletter;
   }
 
-  // localhost:3000/api/offer/?title=dam
+  // localhost:3000/api/newsletter/?title=dam
   static async getAll(title: string = "") {
     /*  return await prisma.offer.findMany({
             where: title ? {
@@ -24,7 +24,7 @@ export class OfferService {
             take: 100
         }) */
 
-    return await prisma.offer.findMany({
+    return await prisma.newsletter.findMany({
       where: {
         ...(title && {
           title: {
@@ -38,7 +38,7 @@ export class OfferService {
       },
       take: 100,
       include: {
-        category: {
+        categories: {
           select: {
             name: true,
           },
@@ -47,38 +47,38 @@ export class OfferService {
     });
   }
 
-  static async create(idUser: number, offer: Offer) {
+  static async create(idUser: number, newsletter: Newsletter) {
     console.log("creando", idUser);
-    return await prisma.offer.create({
+    return await prisma.newsletter.create({
       data: {
-        ...offer,
+        ...newsletter,
         idUserCreator: idUser,
       },
     });
   }
 
-  static async update(id: number, offer: Offer) {
-    const findOffer = await prisma.offer.findUnique({ where: { id } });
-    if (!findOffer) throw new HttpException(404, "Offer doesnt exists");
-    return await prisma.offer.update({
+  static async update(id: number, newsletter: Newsletter) {
+    const findNewsletter = await prisma.newsletter.findUnique({ where: { id } });
+    if (!findNewsletter) throw new HttpException(404, "Newsletter doesnt exists");
+    return await prisma.newsletter.update({
       where: { id },
       data: {
-        ...offer,
+        ...newsletter,
       },
     });
   }
 
   static async delete(id: number) {
     try {
-      return await prisma.offer.delete({ where: { id } });
+      return await prisma.newsletter.delete({ where: { id } });
     } catch (error) {
-      throw new HttpException(404, "Offer not found");
+      throw new HttpException(404, "Newsletter not found");
     }
   }
 
   static async rate(
     idUser: number,
-    idOffer: number,
+    idNewsletter: number,
     value: number
   ): Promise<void> {
     // Validar que el rating está dentro del rango permitido
@@ -87,9 +87,9 @@ export class OfferService {
     }
 
     // Verificar si la oferta existe
-    const offer = await prisma.offer.findUnique({ where: { id: idOffer } });
-    if (!offer) {
-      throw new Error("Offer not found.");
+    const newsletter = await prisma.newsletter.findUnique({ where: { id: idNewsletter } });
+    if (!newsletter) {
+      throw new Error("Newsletter not found.");
     }
 
     // Actualizar o crear la calificación
@@ -100,15 +100,15 @@ export class OfferService {
     WHERE offerId = <offerId>;
         */
     await prisma.rate.upsert({
-      where: { idUser_idOffer: { idUser, idOffer } },
+      where: { idUser_idNewsletter: { idUser, idNewsletter } },
       update: { value },
-      create: { idUser, idOffer, value },
+      create: { idUser, idNewsletter, value },
     });
   }
 
-  static async getRate(idOffer: number) {
+  static async getRate(idNewsletter: number) {
     const ratingStats = await prisma.rate.aggregate({
-      where: { idOffer },
+      where: { idNewsletter },
       _avg: { value: true }, // Calcular el promedio
       _count: { value: true }, // Contar el total de calificaciones
     });
@@ -118,9 +118,9 @@ export class OfferService {
     };
   }
 
-  static async getMyRate(idUser: number, idOffer: number) {
+  static async getMyRate(idUser: number, idNewsletter: number) {
     return await prisma.rate.findUnique({
-      where: { idUser_idOffer: { idUser, idOffer } },
+      where: { idUser_idNewsletter: { idUser, idNewsletter } },
     });
   }
 }
