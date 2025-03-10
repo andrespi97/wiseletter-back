@@ -47,23 +47,26 @@ export class NewsletterService {
     });
   }
 
-  static async create(idUser: number, newsletter: Newsletter) {
+  static async create(idUser: number, newsletter: Omit<Newsletter, "categories"> & { categories?: number[] }) {
     console.log("creando", idUser);
     return await prisma.newsletter.create({
       data: {
         ...newsletter,
         idUserCreator: idUser,
+        categories: newsletter.categories ? { connect: newsletter.categories.map(id => ({ id })) } : undefined,
       },
     });
   }
 
-  static async update(id: number, newsletter: Newsletter) {
+  static async update(id: number, newsletter: Omit<Newsletter, "categories"> & { categories?: number[] }) {
     const findNewsletter = await prisma.newsletter.findUnique({ where: { id } });
     if (!findNewsletter) throw new HttpException(404, "Newsletter doesnt exists");
     return await prisma.newsletter.update({
       where: { id },
       data: {
         ...newsletter,
+        categories: newsletter.categories ? { connect: newsletter.categories.map(id => ({ id })) } : undefined,
+
       },
     });
   }

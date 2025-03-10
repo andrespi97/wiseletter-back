@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
@@ -20,17 +14,17 @@ model User {
   surname            String?
   email              String         @unique
   password           String
-  role               String? // admin, vip, null
+  role               String?
   course             String?
   active             Boolean        @default(true)
   accepNotifications Boolean        @default(true)
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
-  subscriptions      Subscription[]
   folders            Folder[]
-  rates              Rate[]
-  newsletters        Newsletter[]   @relation("UserNewsletters")
   Newsletter         Newsletter[]
+  rates              Rate[]
+  subscriptions      Subscription[]
+  newsletters        Newsletter[]   @relation("UserNewsletters")
 }
 
 model Category {
@@ -45,53 +39,49 @@ model Rate {
   idUser       Int
   idNewsletter Int
   value        Int
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  newsletter   Newsletter @relation(fields: [idNewsletter], references: [id])
+  user         User       @relation(fields: [idUser], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user       User       @relation(fields: [idUser], references: [id])
-  newsletter Newsletter @relation(fields: [idNewsletter], references: [id])
-
-  @@id([idUser, idNewsletter]) // Ensure that one user can only rate a newsletter once
+  @@id([idUser, idNewsletter])
 }
 
 model Folder {
   id          Int          @id @default(autoincrement())
   name        String
-  idUser      Int // Changed to Int for consistency
+  idUser      Int
+  createdAt   DateTime     @default(now())
   user        User         @relation(fields: [idUser], references: [id])
   newsletters Newsletter[]
-  createdAt   DateTime     @default(now())
 }
 
 model Subscription {
   id           Int        @id @default(autoincrement())
-  idUser       Int // Changed to Int for consistency
+  idUser       Int
   idNewsletter Int
-  user         User       @relation(fields: [idUser], references: [id])
-  newsletter   Newsletter @relation(fields: [idNewsletter], references: [id])
   createdAt    DateTime   @default(now())
+  newsletter   Newsletter @relation(fields: [idNewsletter], references: [id])
+  user         User       @relation(fields: [idUser], references: [id])
 
-  @@unique([idUser, idNewsletter]) // Un usuario no puede suscribirse dos veces a la misma newsletter
+  @@unique([idUser, idNewsletter])
 }
 
 model Newsletter {
-  id          Int        @id @default(autoincrement())
-  title       String
-  description String
-  active      Boolean    @default(true)
-  url         String     @unique
-  categories  Category[] @relation("CategoryNewsletters")
-
-  subscriptions Subscription[]
-  rates         Rate[]
+  id            Int            @id @default(autoincrement())
+  title         String
+  description   String
+  active        Boolean        @default(true)
+  url           String         @unique
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   idFolder      Int?
-  folder        Folder?        @relation(fields: [idFolder], references: [id])
   idUserCreator Int
-  userCreator   User           @relation(fields: [idUserCreator], references: [id])
   language      String?
-
-  User User[] @relation("UserNewsletters")
+  userCreator   User           @relation(fields: [idUserCreator], references: [id])
+  folder        Folder?        @relation(fields: [idFolder], references: [id])
+  rates         Rate[]
+  subscriptions Subscription[]
+  categories    Category[]     @relation("CategoryNewsletters")
+  User          User[]         @relation("UserNewsletters")
 }
