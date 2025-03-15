@@ -22,6 +22,7 @@ model User {
   updatedAt          DateTime       @updatedAt
   folders            Folder[]
   Newsletter         Newsletter[]
+  Queja              Queja[]
   rates              Rate[]
   subscriptions      Subscription[]
   newsletters        Newsletter[]   @relation("UserNewsletters")
@@ -84,4 +85,14 @@ model Newsletter {
   subscriptions Subscription[]
   categories    Category[]     @relation("CategoryNewsletters")
   User          User[]         @relation("UserNewsletters")
+}
+
+model Queja {
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+
+  createdAt     DateTime @default(now())
+  idUserCreator Int
+  userCreator   User     @relation(fields: [idUserCreator], references: [id])
 }

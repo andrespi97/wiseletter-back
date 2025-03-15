@@ -3,7 +3,7 @@ import authRouter from './routes/auth.routes'
 import userRouter from './routes/user.routes'
 import newsletterRouter from './routes/newsletter.routes'
 import categoryRouter from './routes/category.routes'
-
+import quejaRouter from './routes/queja.routes'
 import rateLimit from 'express-rate-limit'
 import helmet from 'helmet'
 import compression from 'compression'
@@ -23,7 +23,7 @@ app.use(cookieParser())
 //todo limitar cors
 //cambiar la url cuando deploy
 app.use(cors({
-    origin: ['https://wiseletter-front.onrender.com/', 'https://wiseletter-front.onrender.com'],
+    origin: ['https://wiseletter-front.onrender.com/', 'https://wiseletter-front.onrender.com', "http://localhost:5173"],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -41,6 +41,7 @@ app.use(limiter)
 
 app.use('/api/auth', authRouter)
 app.use('/api/users', userRouter)
+app.use('/api/quejas', quejaRouter)
 app.use('/api/newsletters', newsletterRouter)
 app.use('/api/categories', categoryRouter)
 

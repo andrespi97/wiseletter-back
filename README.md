@@ -40,12 +40,16 @@ npx npm-check-updates -u        // actualiza
 npm i morgan
 npm i --save-dev @types/morgan
 
-actualizar turso turso db shell newslettersdb < ./prisma/migrations/20250307121619_con_newsletters/migration.sql
+
+turso db shell newslettersdb < ./prisma/migrations/20250307121619_con_newsletters/migration.sql
 
 ```
+## actualizar turso
+```bash
 
+turso db shell newslettersdb < ./prisma/migrations/20250307121619_con_newsletters/migration.sql
 
-
+```
 
 
 Ejercicio 1:
